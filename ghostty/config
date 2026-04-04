@@ -31,6 +31,18 @@ font-size = 14
 # ============================================================
 # close splits/tabs without confirmation prompt
 confirm-close-surface = false
+copy-on-select = true
+scrollback-limit = 10000
+shell-integration = zsh
+
+# ============================================================
+# appearance
+# ============================================================
+window-padding-x = 10
+window-padding-y = 10
+window-decoration = false
+cursor-style = bar
+cursor-style-blink = true
 
 # ============================================================
 # keybindings — create splits
@@ -89,3 +101,8 @@ keybind = ctrl+shift+comma=previous_tab
 keybind = ctrl+shift+w=close_surface
 # close current tab
 keybind = ctrl+shift+q=close_tab
+
+# ============================================================
+# keybindings — quick terminal
+# ============================================================
+keybind = ctrl+grave_accent=toggle_quick_terminal

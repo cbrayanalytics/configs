@@ -1,0 +1,11 @@
+# Ignore everything at this level except explicitly tracked configs
+/*
+!/nvim
+!/ghostty
+!/.gitignore
+
+# Ignore claude settings within tracked dirs
+**/.claude/
+
+# Ignore nvim runtime/cache files
+nvim/lazy-lock.json

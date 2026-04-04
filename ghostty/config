@@ -1,0 +1,91 @@
+# ============================================================
+# theme
+# ============================================================
+background = #272822
+foreground = #F8F8F2
+palette = 0=#272822
+palette = 1=#F92672
+palette = 2=#A6E22E
+palette = 3=#F4BF75
+palette = 4=#66D9EF
+palette = 5=#AE81FF
+palette = 6=#A1EFE4
+palette = 7=#F8F8F2
+palette = 8=#75715E
+palette = 9=#F92672
+palette = 10=#A6E22E
+palette = 11=#F4BF75
+palette = 12=#66D9EF
+palette = 13=#AE81FF
+palette = 14=#A1EFE4
+palette = 15=#F9F8F5
+
+# ============================================================
+# font
+# ============================================================
+font-family = DepartureMono Nerd Font Mono
+font-size = 14
+
+# ============================================================
+# behavior
+# ============================================================
+# close splits/tabs without confirmation prompt
+confirm-close-surface = false
+
+# ============================================================
+# keybindings — create splits
+# ============================================================
+# open new split to the right
+keybind = ctrl+shift+d=new_split:right
+# open new split below
+keybind = ctrl+shift+s=new_split:down
+
+# ============================================================
+# keybindings — split navigation
+# ============================================================
+# focus split to the left
+keybind = ctrl+shift+h=goto_split:left
+# focus split below
+keybind = ctrl+shift+j=goto_split:down
+# focus split above
+keybind = ctrl+shift+k=goto_split:up
+# focus split to the right
+keybind = ctrl+shift+l=goto_split:right
+
+# ============================================================
+# keybindings — split resizing
+# ============================================================
+# shrink split leftward
+keybind = ctrl+shift+left=resize_split:left,10
+# grow split downward
+keybind = ctrl+shift+down=resize_split:down,10
+# shrink split upward
+keybind = ctrl+shift+up=resize_split:up,10
+# grow split rightward
+keybind = ctrl+shift+right=resize_split:right,10
+
+# ============================================================
+# keybindings — split zoom / equalize
+# ============================================================
+# zoom / unzoom current split
+keybind = ctrl+shift+enter=toggle_split_zoom
+# equalize all split sizes
+keybind = ctrl+shift+equal=equalize_splits
+
+# ============================================================
+# keybindings — tabs
+# ============================================================
+# open new tab
+keybind = ctrl+shift+t=new_tab
+# go to next tab
+keybind = ctrl+shift+period=next_tab
+# go to previous tab
+keybind = ctrl+shift+comma=previous_tab
+
+# ============================================================
+# keybindings — close
+# ============================================================
+# close current split
+keybind = ctrl+shift+w=close_surface
+# close current tab
+keybind = ctrl+shift+q=close_tab

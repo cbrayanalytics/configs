@@ -16,4 +16,11 @@ return {
       automatic_enable = false, -- we handle vim.lsp.enable() manually
     },
   },
+  {
+    "rshkarin/mason-nvim-lint",
+    dependencies = { "williamboman/mason.nvim", "mfussenegger/nvim-lint" },
+    opts = {
+      ensure_installed = { "ruff" },
+    },
+  },
 }

@@ -137,11 +137,27 @@ check_ohmyzsh() {
   log "Checking Oh My Zsh..."
   if [ -d "$HOME/.oh-my-zsh" ]; then
     info "Oh My Zsh already installed"
-    return
+  else
+    log "Installing Oh My Zsh..."
+    # RUNZSH=no prevents switching shell mid-install; CHSH=no skips chsh prompt
+    RUNZSH=no CHSH=no sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
   fi
-  log "Installing Oh My Zsh..."
-  # RUNZSH=no prevents switching shell mid-install; CHSH=no skips chsh prompt
-  RUNZSH=no CHSH=no sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+
+  local custom="${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/plugins"
+
+  if [ -d "$custom/zsh-autosuggestions" ]; then
+    info "zsh-autosuggestions already installed"
+  else
+    log "Installing zsh-autosuggestions..."
+    git clone --depth=1 https://github.com/zsh-users/zsh-autosuggestions "$custom/zsh-autosuggestions"
+  fi
+
+  if [ -d "$custom/zsh-syntax-highlighting" ]; then
+    info "zsh-syntax-highlighting already installed"
+  else
+    log "Installing zsh-syntax-highlighting..."
+    git clone --depth=1 https://github.com/zsh-users/zsh-syntax-highlighting "$custom/zsh-syntax-highlighting"
+  fi
 }
 
 check_neovim() {
@@ -259,6 +275,7 @@ main() {
   check_ohmyzsh
   ensure_pkg "Starship"  "starship"
   ensure_pkg "zoxide"    "zoxide"
+  ensure_pkg "fzf"       "fzf"
 
   # Terminal
   ensure_cask "Ghostty"  "ghostty"  "ghostty"  "ghostty"
@@ -271,6 +288,7 @@ main() {
   ensure_pkg "fd"        "fd"
   ensure_pkg "ripgrep"   "ripgrep"  "rg"
   ensure_pkg "Node.js"   "node"
+  ensure_pkg "Python"    "python3"
 
   # Modern CLI tools (used in .zshrc aliases)
   ensure_pkg "eza"       "eza"

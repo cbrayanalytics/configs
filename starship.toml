@@ -123,12 +123,12 @@ format = "[  $time]($style)"
 time_format = "%I:%M %p"
 
 [rust]
-symbol = ""
+symbol = ""
 style = "bold #F92672"
 format = "[via $symbol($version )]($style)"
 
 [aws]
-symbol = ""
+symbol = ""
 style = "bold #F4BF75"
 format = '[on $symbol($profile )(\[$duration\] )]($style)'
 disabled = false
@@ -144,7 +144,7 @@ format = "[$symbol$status ]($style)"
 
 [sudo]
 disabled = false
-symbol = ""
+symbol = "󱐥 "
 style = "bold #F92672"
 format = "[$symbol]($style)"
 

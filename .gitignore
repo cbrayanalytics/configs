@@ -9,6 +9,3 @@
 
 # Ignore claude settings within tracked dirs
 **/.claude/
-
-# Ignore nvim runtime/cache files
-nvim/lazy-lock.json

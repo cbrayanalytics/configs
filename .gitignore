@@ -5,6 +5,7 @@
 !/zsh
 !/starship.toml
 !/.gitignore
+!/install.sh
 
 # Ignore claude settings within tracked dirs
 **/.claude/

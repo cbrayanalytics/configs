@@ -2,6 +2,8 @@
 /*
 !/nvim
 !/ghostty
+!/zsh
+!/starship.toml
 !/.gitignore
 
 # Ignore claude settings within tracked dirs

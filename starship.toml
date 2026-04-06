@@ -1,0 +1,99 @@
+# ==================================================
+# Starship Configuration
+# ==================================================
+# Docs: https://starship.rs/config/
+
+# Inserts a blank line between shell prompts
+add_newline = true
+
+# Overall prompt format
+format = """
+[╭─](bold #75715E)$os$username$directory$git_branch$git_status$golang$cmd_duration$time
+[╰─](bold #75715E)$character"""
+
+# ==================================================
+# Prompt Character
+# ==================================================
+[character]
+success_symbol = "[❯](bold #A6E22E)"
+error_symbol = "[❯](bold #F92672)"
+vimcmd_symbol = "[❮](bold #E6DB74)"
+
+# ==================================================
+# OS / User
+# ==================================================
+[os]
+disabled = false
+style = "bold #66D9EF"
+
+[os.symbols]
+Macos = " "
+
+[username]
+show_always = false
+style_user = "bold dimmed white"
+style_root = "bold red"
+format = "[$user]($style) "
+
+# ==================================================
+# Directory
+# ==================================================
+[directory]
+style = "bold #66D9EF"
+truncation_length = 4
+truncate_to_repo = true
+format = "[ $path]($style)[$read_only]($read_only_style) "
+read_only = " 󰌾"
+
+# ==================================================
+# Git
+# ==================================================
+[git_branch]
+symbol = " "
+style = "bold #AE81FF"
+format = "[on $symbol$branch]($style) "
+
+[git_status]
+style = "bold #E6DB74"
+format = "([$all_status$ahead_behind]($style) )"
+conflicted = "󰩌 "
+ahead = "⇡${count} "
+behind = "⇣${count} "
+diverged = "⇕⇡${ahead_count}⇣${behind_count} "
+untracked = "󰋗 "
+stashed = " "
+modified = " "
+staged = " "
+renamed = " "
+deleted = " "
+
+# ==================================================
+# Languages
+# ==================================================
+[golang]
+symbol = " "
+style = "bold #A6E22E"
+format = "[via $symbol($version )]($style)"
+
+# ==================================================
+# Command Duration
+# ==================================================
+[cmd_duration]
+min_time = 2_000
+style = "bold #E6DB74"
+format = "[ $duration]($style) "
+
+# ==================================================
+# Time
+# ==================================================
+[time]
+disabled = false
+style = "bold dimmed #75715E"
+format = "[ $time]($style)"
+time_format = "%I:%M %p"
+
+# ==================================================
+# Disabled modules
+# ==================================================
+[package]
+disabled = true

@@ -8,7 +8,7 @@ add_newline = true
 
 # Overall prompt format
 format = """
-[╭─](bold #75715E)$os$username$directory$git_branch$git_status$python$golang$nodejs$lua$cmd_duration$time
+[╭─](bold #75715E)$os$username$directory$git_branch$git_status$python$golang$nodejs$lua$shell$cmd_duration$time
 [╰─](bold #75715E)$character"""
 
 # ==================================================
@@ -97,6 +97,13 @@ style = "bold #66D9EF"
 format = "[via $symbol($version )]($style)"
 detect_extensions = ["lua"]
 detect_files = [".lua-version"]
+
+[shell]
+bash_indicator = " bash"
+zsh_indicator = ""
+disabled = false
+style = "bold #F92672"
+format = "[$indicator]($style) "
 
 # ==================================================
 # Command Duration

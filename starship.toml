@@ -128,7 +128,7 @@ style = "bold #F92672"
 format = "[via $symbol($version )]($style)"
 
 [aws]
-symbol = ""
+symbol = " "
 style = "bold #F4BF75"
 format = '[on $symbol($profile )(\[$duration\] )]($style)'
 disabled = false

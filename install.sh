@@ -308,7 +308,7 @@ main() {
   echo ""
   echo -e "  ${BOLD}How would you like to apply changes?${NC}"
   echo "    1) Reload shell in-place (exec zsh)"
-  echo "    2) Restart Ghostty"
+  echo "    2) Reload Ghostty config (Shift+Cmd+,)"
   echo "    3) Do nothing (restart manually later)"
   echo ""
   read -rp "  Choice [1/2/3]: " choice
@@ -319,11 +319,10 @@ main() {
       ;;
     2)
       if [ "$OS" = "macos" ]; then
-        osascript -e 'tell application "Ghostty" to quit' \
-                  -e 'delay 1' \
-                  -e 'tell application "Ghostty" to activate'
+        osascript -e 'tell application "System Events" to tell process "Ghostty" to keystroke "," using {shift down, command down}'
+        info "Ghostty config reloaded."
       else
-        warn "Ghostty restart via script is only supported on macOS. Please restart manually."
+        warn "Ghostty config reload via script is only supported on macOS. Please restart manually."
       fi
       ;;
     *)

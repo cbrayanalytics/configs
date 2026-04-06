@@ -140,7 +140,7 @@ check_ohmyzsh() {
     skip "Oh My Zsh"
   fi
 
-  local custom="${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/plugins"
+  local custom="$HOME/.oh-my-zsh/custom/plugins"
 
   if [ ! -d "$custom/zsh-autosuggestions" ]; then
     spin_install "Installing zsh-autosuggestions..." \
@@ -195,7 +195,7 @@ check_font() {
     if fc-list 2>/dev/null | grep -qi "BigBlueTerm"; then
       skip "BigBlueTerm437 Nerd Font"
     else
-      if spin_install "Installing BigBlueTerm437 Nerd Font..." yay -S --noconfirm ttf-bigblueterm437-nerd 2>/dev/null; then
+      if spin_install "Installing BigBlueTerm437 Nerd Font..." yay -S --noconfirm ttf-bigblueterm437-nerd; then
         ok "BigBlueTerm437 Nerd Font"
       else
         gwarn "BigBlueTerm437 Nerd Font not found in AUR — install manually: https://www.nerdfonts.com/font-downloads"
@@ -307,7 +307,7 @@ main() {
   choice=$(gum choose \
     "Reload shell (exec zsh)" \
     "Reload shell + Ghostty config" \
-    "Do nothing")
+    "Do nothing") || choice="Do nothing"
 
   case "$choice" in
     "Reload shell (exec zsh)")

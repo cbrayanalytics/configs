@@ -222,7 +222,7 @@ link_config() {
   label="$(basename "$dst")"
 
   if [ "$src" = "$dst" ]; then
-    skip "$label (repo is at target location)"
+    skip "$label"
     return
   fi
 
@@ -267,41 +267,44 @@ main() {
 
   gum style \
     --foreground 212 --border-foreground 212 --border rounded \
-    --align center --width 50 --margin "1 2" --padding "1 2" \
-    "$(gum style --bold --foreground 212 'Dotfiles Installer')"
+    --bold --align center --width 50 --margin "1 2" --padding "1 2" \
+    "Dotfiles Installer"
 
-  section "Shell"
+  section " Shell"
   check_ohmyzsh
   ensure_pkg "Starship" "starship"
   ensure_pkg "zoxide"   "zoxide"
   ensure_pkg "fzf"      "fzf"
 
-  section "Terminal"
+  section " Terminal"
   ensure_cask "Ghostty" "ghostty" "ghostty" "ghostty"
   check_font
 
-  section "Editor"
+  section " Editor"
   check_neovim
 
-  section "Neovim dependencies"
+  section " Neovim"
   ensure_pkg "fd"      "fd"
   ensure_pkg "ripgrep" "ripgrep" "rg"
   ensure_pkg "Node.js" "node"
   ensure_pkg "Python"  "python3"
 
-  section "CLI tools"
+  section " CLI"
   ensure_pkg "eza"  "eza"
   ensure_pkg "bat"  "bat"
   ensure_pkg "btop" "btop"
 
-  section "Symlinks"
+  section " Symlinks"
   link_config "$REPO_DIR/nvim"          "$HOME/.config/nvim"
   link_config "$REPO_DIR/ghostty"       "$HOME/.config/ghostty"
   link_config "$REPO_DIR/starship.toml" "$HOME/.config/starship.toml"
   link_config "$REPO_DIR/zsh/.zshrc"   "$HOME/.zshrc"
 
   echo ""
-  gum style --foreground 2 --bold "  All done!"
+  gum style \
+    --foreground 2 --border-foreground 2 --border rounded \
+    --padding "0 2" --margin "0 2" \
+    "✓  All done!"
   echo ""
 
   choice=$(gum choose \

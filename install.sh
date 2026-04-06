@@ -188,11 +188,11 @@ check_neovim() {
 check_font() {
   log "Checking BigBlueTerm437 Nerd Font..."
   if [ "$OS" = "macos" ]; then
-    if cask_installed_mac font-bigblueterm437-nerd-font; then
+    if cask_installed_mac font-bigblue-terminal-nerd-font; then
       info "BigBlueTerm437 Nerd Font already installed"
     else
       log "Installing BigBlueTerm437 Nerd Font..."
-      brew install --cask font-bigblueterm437-nerd-font
+      brew install --cask font-bigblue-terminal-nerd-font
     fi
   elif [ "$OS" = "arch" ]; then
     if fc-list 2>/dev/null | grep -qi "BigBlueTerm"; then

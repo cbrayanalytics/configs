@@ -304,7 +304,33 @@ main() {
   setup_symlinks
 
   echo ""
-  log "Done! Restart your terminal to apply all changes."
+  log "Done!"
+  echo ""
+  echo -e "  ${BOLD}How would you like to apply changes?${NC}"
+  echo "    1) Reload shell in-place (exec zsh)"
+  echo "    2) Restart Ghostty"
+  echo "    3) Do nothing (restart manually later)"
+  echo ""
+  read -rp "  Choice [1/2/3]: " choice
+
+  case "$choice" in
+    1)
+      exec zsh
+      ;;
+    2)
+      if [ "$OS" = "macos" ]; then
+        osascript -e 'tell application "Ghostty" to quit' \
+                  -e 'delay 1' \
+                  -e 'tell application "Ghostty" to activate'
+      else
+        warn "Ghostty restart via script is only supported on macOS. Please restart manually."
+      fi
+      ;;
+    *)
+      echo ""
+      info "Run 'exec zsh' or restart Ghostty when ready."
+      ;;
+  esac
 }
 
 main "$@"

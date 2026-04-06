@@ -26,6 +26,7 @@ return {
         map("n", "<leader>hR", gs.reset_buffer,               "Reset buffer")
         map("n", "<leader>hp", gs.preview_hunk,               "Preview hunk")
         map("n", "<leader>hb", function() gs.blame_line({ full = true }) end, "Blame line")
+        map("n", "<leader>hB", gs.toggle_current_line_blame,                 "Toggle inline blame")
         map("n", "<leader>hd", gs.diffthis,                   "Diff this")
         map({ "o", "x" }, "ih", ":<C-U>Gitsigns select_hunk<CR>", "Select hunk")
       end,

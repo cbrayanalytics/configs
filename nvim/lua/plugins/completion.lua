@@ -17,7 +17,9 @@ return {
       },
       sources = {
         default = { "lsp", "path", "snippets", "buffer" },
-        cmdline = { "cmdline" },
+      },
+      cmdline = {
+        sources = { "cmdline" },
       },
       completion = {
         documentation = { auto_show = true, auto_show_delay_ms = 200 },

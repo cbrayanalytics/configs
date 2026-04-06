@@ -8,7 +8,7 @@ add_newline = true
 
 # Overall prompt format
 format = """
-[╭─](bold #75715E)$os$username$directory$git_branch$git_status$golang$cmd_duration$time
+[╭─](bold #75715E)$os$username$directory$git_branch$git_status$python$golang$nodejs$lua$cmd_duration$time
 [╰─](bold #75715E)$character"""
 
 # ==================================================
@@ -28,6 +28,8 @@ style = "bold #66D9EF"
 
 [os.symbols]
 Macos = " "
+Linux = " "
+Arch  = " "
 
 [username]
 show_always = false
@@ -70,10 +72,31 @@ deleted = " "
 # ==================================================
 # Languages
 # ==================================================
+[python]
+symbol = " "
+style = "bold #F4BF75"
+format = '[via $symbol($version )(\($virtualenv\) )]($style)'
+detect_extensions = ["py"]
+detect_files = [".python-version", "Pipfile", "pyproject.toml", "requirements.txt"]
+
 [golang]
 symbol = " "
 style = "bold #A6E22E"
 format = "[via $symbol($version )]($style)"
+
+[nodejs]
+symbol = " "
+style = "bold #A6E22E"
+format = "[via $symbol($version )]($style)"
+detect_files = ["package.json", ".nvmrc"]
+detect_folders = ["node_modules"]
+
+[lua]
+symbol = " "
+style = "bold #66D9EF"
+format = "[via $symbol($version )]($style)"
+detect_extensions = ["lua"]
+detect_files = [".lua-version"]
 
 # ==================================================
 # Command Duration

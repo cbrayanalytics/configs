@@ -306,20 +306,21 @@ main() {
 
   choice=$(gum choose \
     "Reload shell (exec zsh)" \
-    "Reload Ghostty config" \
+    "Reload shell + Ghostty config" \
     "Do nothing")
 
   case "$choice" in
     "Reload shell (exec zsh)")
       exec zsh
       ;;
-    "Reload Ghostty config")
+    "Reload shell + Ghostty config")
       if [ "$OS" = "macos" ]; then
         osascript -e 'tell application "System Events" to tell process "Ghostty" to keystroke "," using {shift down, command down}'
         ok "Ghostty config reloaded"
       else
-        gwarn "Ghostty config reload via script is only supported on macOS. Please restart manually."
+        gwarn "Ghostty config reload via script is only supported on macOS."
       fi
+      exec zsh
       ;;
     *)
       gum style --foreground 8 "  Run 'exec zsh' or reload Ghostty when ready."

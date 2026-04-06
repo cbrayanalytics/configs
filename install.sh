@@ -1,25 +1,21 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# ============================================================
-# Dotfiles installer
-# Supports: macOS (Homebrew), Arch Linux (yay)
-# ============================================================
-
 REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 TIMESTAMP=$(date +%Y%m%d%H%M%S)
 
-RED='\033[0;31m'
+# ============================================================
+# Bootstrap helpers — plain ANSI, used before gum is available
+# ============================================================
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
-BLUE='\033[0;34m'
+RED='\033[0;31m'
 BOLD='\033[1m'
 NC='\033[0m'
 
-log()   { echo -e "${GREEN}${BOLD}==>${NC} $*"; }
-info()  { echo -e "${BLUE}  ->${NC} $*"; }
-warn()  { echo -e "${YELLOW}  WARN:${NC} $*"; }
-error() { echo -e "${RED}  ERROR:${NC} $*" >&2; exit 1; }
+blog()  { echo -e "${GREEN}${BOLD}==>${NC} $*"; }
+bwarn() { echo -e "${YELLOW}  WARN:${NC} $*"; }
+berror(){ echo -e "${RED}  ERROR:${NC} $*" >&2; exit 1; }
 
 # ============================================================
 # OS Detection
@@ -35,26 +31,22 @@ detect_os() {
       if [ -f /etc/arch-release ]; then
         OS="arch"
       else
-        error "Linux detected but not Arch. Only macOS and Arch Linux are supported."
+        berror "Linux detected but not Arch. Only macOS and Arch Linux are supported."
       fi
       ;;
-    *) error "Unsupported OS: $uname" ;;
+    *) berror "Unsupported OS: $uname" ;;
   esac
-  log "Detected OS: $OS"
+  blog "Detected OS: $OS"
 }
 
 # ============================================================
-# Package Manager Setup
+# Package Manager Bootstrap
 # ============================================================
 
 ensure_brew() {
-  if command -v brew &>/dev/null; then
-    info "Homebrew already installed"
-    return
-  fi
-  log "Installing Homebrew..."
+  if command -v brew &>/dev/null; then return; fi
+  blog "Installing Homebrew..."
   /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-  # Add brew to PATH for the rest of this script (Apple Silicon vs Intel)
   if [ -f /opt/homebrew/bin/brew ]; then
     eval "$(/opt/homebrew/bin/brew shellenv)"
   elif [ -f /usr/local/bin/brew ]; then
@@ -63,11 +55,8 @@ ensure_brew() {
 }
 
 ensure_yay() {
-  if command -v yay &>/dev/null; then
-    info "yay already installed"
-    return
-  fi
-  log "Installing yay (AUR helper)..."
+  if command -v yay &>/dev/null; then return; fi
+  blog "Installing yay (AUR helper)..."
   sudo pacman -S --needed --noconfirm git base-devel
   local tmp
   tmp=$(mktemp -d)
@@ -76,132 +65,140 @@ ensure_yay() {
   (cd "$tmp/yay" && makepkg -si --noconfirm)
   rm -rf "$tmp"
   trap - EXIT
-  info "yay installed"
 }
 
-# ============================================================
-# Install Helpers
-# ============================================================
-
-is_installed() { command -v "$1" &>/dev/null; }
-
-pkg_install() {
+ensure_gum() {
+  if command -v gum &>/dev/null; then return; fi
+  blog "Installing gum..."
   case "$OS" in
-    macos) brew install "$1" ;;
-    arch)  yay -S --noconfirm "$1" ;;
+    macos) brew install gum ;;
+    arch)  yay -S --noconfirm gum ;;
   esac
 }
 
-cask_installed_mac() { brew list --cask "$1" &>/dev/null; }
+# ============================================================
+# Gum helpers — available after ensure_gum
+# ============================================================
 
+is_installed()      { command -v "$1" &>/dev/null; }
+cask_installed_mac(){ brew list --cask "$1" &>/dev/null; }
 pkg_outdated_brew() { brew outdated --quiet 2>/dev/null | grep -q "^${1}$"; }
 
-# Check and install a CLI package. Args: display_name pkg_name [cmd_to_check]
-ensure_pkg() {
-  local display="$1" pkg="$2" cmd="${3:-$2}"
-  log "Checking $display..."
-  if is_installed "$cmd"; then
-    info "$display already installed"
-    return
-  fi
-  log "Installing $display..."
-  pkg_install "$pkg"
+ok()    { gum style --foreground 2 "  ✓ $*"; }
+skip()  { gum style --foreground 8 "  · $*"; }
+gwarn() { gum style --foreground 3 "  ⚠ $*"; }
+
+section() { echo ""; gum style --foreground 99 --bold "  $*"; }
+
+spin_install() {
+  local title="$1"; shift
+  gum spin --spinner dot --title "    $title" -- "$@"
 }
 
-# Check and install a cask (GUI app). Args: display_name mac_cask arch_pkg [arch_cmd]
+ensure_pkg() {
+  local display="$1" pkg="$2" cmd="${3:-$2}"
+  if is_installed "$cmd"; then
+    skip "$display"
+    return
+  fi
+  case "$OS" in
+    macos) spin_install "Installing $display..." brew install "$pkg" ;;
+    arch)  spin_install "Installing $display..." yay -S --noconfirm "$pkg" ;;
+  esac
+  ok "$display"
+}
+
 ensure_cask() {
   local display="$1" mac_cask="$2" arch_pkg="$3" arch_cmd="${4:-$3}"
-  log "Checking $display..."
   if [ "$OS" = "macos" ]; then
     if cask_installed_mac "$mac_cask"; then
-      info "$display already installed"
+      skip "$display"
     else
-      log "Installing $display..."
-      brew install --cask "$mac_cask"
+      spin_install "Installing $display..." brew install --cask "$mac_cask"
+      ok "$display"
     fi
   elif [ "$OS" = "arch" ]; then
     if is_installed "$arch_cmd"; then
-      info "$display already installed"
+      skip "$display"
     else
-      log "Installing $display..."
-      yay -S --noconfirm "$arch_pkg"
+      spin_install "Installing $display..." yay -S --noconfirm "$arch_pkg"
+      ok "$display"
     fi
   fi
 }
 
 # ============================================================
-# Tool Checks (functions for tools with non-trivial logic)
+# Tool Checks
 # ============================================================
 
 check_ohmyzsh() {
-  log "Checking Oh My Zsh..."
-  if [ -d "$HOME/.oh-my-zsh" ]; then
-    info "Oh My Zsh already installed"
+  if [ ! -d "$HOME/.oh-my-zsh" ]; then
+    spin_install "Installing Oh My Zsh..." \
+      bash -c 'RUNZSH=no CHSH=no sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"'
+    ok "Oh My Zsh"
   else
-    log "Installing Oh My Zsh..."
-    # RUNZSH=no prevents switching shell mid-install; CHSH=no skips chsh prompt
-    RUNZSH=no CHSH=no sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+    skip "Oh My Zsh"
   fi
 
   local custom="${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/plugins"
 
-  if [ -d "$custom/zsh-autosuggestions" ]; then
-    info "zsh-autosuggestions already installed"
+  if [ ! -d "$custom/zsh-autosuggestions" ]; then
+    spin_install "Installing zsh-autosuggestions..." \
+      git clone --depth=1 https://github.com/zsh-users/zsh-autosuggestions "$custom/zsh-autosuggestions"
+    ok "zsh-autosuggestions"
   else
-    log "Installing zsh-autosuggestions..."
-    git clone --depth=1 https://github.com/zsh-users/zsh-autosuggestions "$custom/zsh-autosuggestions"
+    skip "zsh-autosuggestions"
   fi
 
-  if [ -d "$custom/zsh-syntax-highlighting" ]; then
-    info "zsh-syntax-highlighting already installed"
+  if [ ! -d "$custom/zsh-syntax-highlighting" ]; then
+    spin_install "Installing zsh-syntax-highlighting..." \
+      git clone --depth=1 https://github.com/zsh-users/zsh-syntax-highlighting "$custom/zsh-syntax-highlighting"
+    ok "zsh-syntax-highlighting"
   else
-    log "Installing zsh-syntax-highlighting..."
-    git clone --depth=1 https://github.com/zsh-users/zsh-syntax-highlighting "$custom/zsh-syntax-highlighting"
+    skip "zsh-syntax-highlighting"
   fi
 }
 
 check_neovim() {
-  log "Checking Neovim..."
   if [ "$OS" = "macos" ]; then
     if ! is_installed nvim; then
-      log "Installing Neovim (latest stable)..."
-      brew install neovim
+      spin_install "Installing Neovim..." brew install neovim
+      ok "Neovim"
     elif pkg_outdated_brew neovim; then
-      log "Upgrading Neovim to latest stable..."
-      brew upgrade neovim
+      spin_install "Upgrading Neovim..." brew upgrade neovim
+      ok "Neovim (upgraded)"
     else
-      info "Neovim is up to date: $(nvim --version | head -1)"
+      skip "Neovim (up to date)"
     fi
   elif [ "$OS" = "arch" ]; then
     if ! is_installed nvim; then
-      log "Installing Neovim (latest stable)..."
-      yay -S --noconfirm neovim
+      spin_install "Installing Neovim..." yay -S --noconfirm neovim
+      ok "Neovim"
     elif yay -Qu neovim &>/dev/null; then
-      log "Upgrading Neovim to latest stable..."
-      yay -S --noconfirm neovim
+      spin_install "Upgrading Neovim..." yay -S --noconfirm neovim
+      ok "Neovim (upgraded)"
     else
-      info "Neovim is up to date: $(nvim --version | head -1)"
+      skip "Neovim (up to date)"
     fi
   fi
 }
 
 check_font() {
-  log "Checking BigBlueTerm437 Nerd Font..."
   if [ "$OS" = "macos" ]; then
     if cask_installed_mac font-bigblue-terminal-nerd-font; then
-      info "BigBlueTerm437 Nerd Font already installed"
+      skip "BigBlueTerm437 Nerd Font"
     else
-      log "Installing BigBlueTerm437 Nerd Font..."
-      brew install --cask font-bigblue-terminal-nerd-font
+      spin_install "Installing BigBlueTerm437 Nerd Font..." brew install --cask font-bigblue-terminal-nerd-font
+      ok "BigBlueTerm437 Nerd Font"
     fi
   elif [ "$OS" = "arch" ]; then
     if fc-list 2>/dev/null | grep -qi "BigBlueTerm"; then
-      info "BigBlueTerm437 Nerd Font already installed"
+      skip "BigBlueTerm437 Nerd Font"
     else
-      log "Installing BigBlueTerm437 Nerd Font..."
-      if ! yay -S --noconfirm ttf-bigblueterm437-nerd 2>/dev/null; then
-        warn "Could not find AUR package for BigBlueTerm437 Nerd Font."
-        warn "Install manually from: https://www.nerdfonts.com/font-downloads"
+      if spin_install "Installing BigBlueTerm437 Nerd Font..." yay -S --noconfirm ttf-bigblueterm437-nerd 2>/dev/null; then
+        ok "BigBlueTerm437 Nerd Font"
+      else
+        gwarn "BigBlueTerm437 Nerd Font not found in AUR — install manually: https://www.nerdfonts.com/font-downloads"
       fi
     fi
   fi
@@ -215,27 +212,25 @@ backup_if_exists() {
   local target="$1"
   if [ -e "$target" ] && [ ! -L "$target" ]; then
     local backup="${target}.bak.${TIMESTAMP}"
-    warn "Backing up $target -> $backup"
+    gwarn "Backing up $(basename "$target") → $backup"
     mv "$target" "$backup"
   fi
 }
 
 link_config() {
-  local src="$1" dst="$2"
+  local src="$1" dst="$2" label
+  label="$(basename "$dst")"
 
-  # Repo is already at the target location — no symlink needed
   if [ "$src" = "$dst" ]; then
-    info "In place: $dst"
+    skip "$label (repo is at target location)"
     return
   fi
 
-  # Already pointing to the right place — skip
   if [ -L "$dst" ] && [ "$(readlink "$dst")" = "$src" ]; then
-    info "Already linked: $dst"
+    skip "$label"
     return
   fi
 
-  # Remove broken symlink so backup_if_exists and ln -sf work correctly
   if [ -L "$dst" ] && [ ! -e "$dst" ]; then
     rm "$dst"
   fi
@@ -243,15 +238,7 @@ link_config() {
   backup_if_exists "$dst"
   mkdir -p "$(dirname "$dst")"
   ln -sf "$src" "$dst"
-  info "Linked: $dst -> $src"
-}
-
-setup_symlinks() {
-  log "Setting up symlinks..."
-  link_config "$REPO_DIR/nvim"          "$HOME/.config/nvim"
-  link_config "$REPO_DIR/ghostty"       "$HOME/.config/ghostty"
-  link_config "$REPO_DIR/starship.toml" "$HOME/.config/starship.toml"
-  link_config "$REPO_DIR/zsh/.zshrc"   "$HOME/.zshrc"
+  ok "$label"
 }
 
 # ============================================================
@@ -259,75 +246,83 @@ setup_symlinks() {
 # ============================================================
 
 main() {
-  echo ""
-  echo -e "${BOLD}Dotfiles Installer${NC}"
-  echo "========================================"
-  echo ""
-
+  # ---- Phase 1: Bootstrap (plain output) ----
   detect_os
 
   case "$OS" in
     macos)
       ensure_brew
-      log "Updating Homebrew..."
-      brew update
+      blog "Updating Homebrew..."
+      brew update -q
       ;;
     arch)
       ensure_yay
       ;;
   esac
 
-  # Shell
-  check_ohmyzsh
-  ensure_pkg "Starship"  "starship"
-  ensure_pkg "zoxide"    "zoxide"
-  ensure_pkg "fzf"       "fzf"
+  ensure_gum
 
-  # Terminal
-  ensure_cask "Ghostty"  "ghostty"  "ghostty"  "ghostty"
+  # ---- Phase 2: Gum-powered ----
+  clear
+
+  gum style \
+    --foreground 212 --border-foreground 212 --border rounded \
+    --align center --width 50 --margin "1 2" --padding "1 2" \
+    "$(gum style --bold --foreground 212 'Dotfiles Installer')"
+
+  section "Shell"
+  check_ohmyzsh
+  ensure_pkg "Starship" "starship"
+  ensure_pkg "zoxide"   "zoxide"
+  ensure_pkg "fzf"      "fzf"
+
+  section "Terminal"
+  ensure_cask "Ghostty" "ghostty" "ghostty" "ghostty"
   check_font
 
-  # Editor
+  section "Editor"
   check_neovim
 
-  # Neovim runtime dependencies
-  ensure_pkg "fd"        "fd"
-  ensure_pkg "ripgrep"   "ripgrep"  "rg"
-  ensure_pkg "Node.js"   "node"
-  ensure_pkg "Python"    "python3"
+  section "Neovim dependencies"
+  ensure_pkg "fd"      "fd"
+  ensure_pkg "ripgrep" "ripgrep" "rg"
+  ensure_pkg "Node.js" "node"
+  ensure_pkg "Python"  "python3"
 
-  # Modern CLI tools (used in .zshrc aliases)
-  ensure_pkg "eza"       "eza"
-  ensure_pkg "bat"       "bat"
-  ensure_pkg "btop"      "btop"
+  section "CLI tools"
+  ensure_pkg "eza"  "eza"
+  ensure_pkg "bat"  "bat"
+  ensure_pkg "btop" "btop"
 
-  setup_symlinks
+  section "Symlinks"
+  link_config "$REPO_DIR/nvim"          "$HOME/.config/nvim"
+  link_config "$REPO_DIR/ghostty"       "$HOME/.config/ghostty"
+  link_config "$REPO_DIR/starship.toml" "$HOME/.config/starship.toml"
+  link_config "$REPO_DIR/zsh/.zshrc"   "$HOME/.zshrc"
 
   echo ""
-  log "Done!"
+  gum style --foreground 2 --bold "  All done!"
   echo ""
-  echo -e "  ${BOLD}How would you like to apply changes?${NC}"
-  echo "    1) Reload shell in-place (exec zsh)"
-  echo "    2) Reload Ghostty config (Shift+Cmd+,)"
-  echo "    3) Do nothing (restart manually later)"
-  echo ""
-  read -rp "  Choice [1/2/3]: " choice
+
+  choice=$(gum choose \
+    "Reload shell (exec zsh)" \
+    "Reload Ghostty config" \
+    "Do nothing")
 
   case "$choice" in
-    1)
+    "Reload shell (exec zsh)")
       exec zsh
       ;;
-    2)
+    "Reload Ghostty config")
       if [ "$OS" = "macos" ]; then
         osascript -e 'tell application "System Events" to tell process "Ghostty" to keystroke "," using {shift down, command down}'
-        info "Ghostty config reloaded."
+        ok "Ghostty config reloaded"
       else
-        warn "Ghostty config reload via script is only supported on macOS. Please restart manually."
+        gwarn "Ghostty config reload via script is only supported on macOS. Please restart manually."
       fi
       ;;
     *)
-      echo ""
-      info "Run 'exec zsh' or restart Ghostty when ready."
+      gum style --foreground 8 "  Run 'exec zsh' or reload Ghostty when ready."
       ;;
   esac
 }

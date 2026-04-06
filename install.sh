@@ -286,8 +286,11 @@ main() {
   section " Neovim"
   ensure_pkg "fd"      "fd"
   ensure_pkg "ripgrep" "ripgrep" "rg"
-  ensure_pkg "Node.js" "node"
-  ensure_pkg "Python"  "python3"
+  local node_pkg python_pkg
+  node_pkg="$(  [ "$OS" = "arch" ] && echo "nodejs"  || echo "node"    )"
+  python_pkg="$([ "$OS" = "arch" ] && echo "python"  || echo "python3" )"
+  ensure_pkg "Node.js" "$node_pkg"   "node"
+  ensure_pkg "Python"  "$python_pkg" "python3"
 
   section " CLI"
   ensure_pkg "eza"  "eza"

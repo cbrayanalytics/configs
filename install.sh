@@ -191,6 +191,12 @@ check_font() {
       spin_install "Installing BigBlueTerm437 Nerd Font..." brew install --cask font-bigblue-terminal-nerd-font
       ok "BigBlueTerm437 Nerd Font"
     fi
+    if cask_installed_mac font-symbols-only-nerd-font; then
+      skip "Symbols Nerd Font (fallback)"
+    else
+      spin_install "Installing Symbols Nerd Font..." brew install --cask font-symbols-only-nerd-font
+      ok "Symbols Nerd Font (fallback)"
+    fi
   elif [ "$OS" = "arch" ]; then
     if fc-list 2>/dev/null | grep -qi "BigBlueTerm"; then
       skip "BigBlueTerm437 Nerd Font"
@@ -200,6 +206,12 @@ check_font() {
       else
         gwarn "BigBlueTerm437 Nerd Font not found in AUR — install manually: https://www.nerdfonts.com/font-downloads"
       fi
+    fi
+    if fc-list 2>/dev/null | grep -qi "Symbols Nerd Font"; then
+      skip "Symbols Nerd Font (fallback)"
+    else
+      spin_install "Installing Symbols Nerd Font..." yay -S --noconfirm ttf-nerd-fonts-symbols
+      ok "Symbols Nerd Font (fallback)"
     fi
   fi
 }

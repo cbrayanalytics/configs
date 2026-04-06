@@ -24,6 +24,7 @@ palette = 15=#F9F8F5
 # font
 # ============================================================
 font-family = BigBlueTerm437 Nerd Font Mono
+font-family = Symbols Nerd Font Mono
 font-size = 14
 
 # ============================================================

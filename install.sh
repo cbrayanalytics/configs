@@ -223,6 +223,12 @@ backup_if_exists() {
 link_config() {
   local src="$1" dst="$2"
 
+  # Repo is already at the target location — no symlink needed
+  if [ "$src" = "$dst" ]; then
+    info "In place: $dst"
+    return
+  fi
+
   # Already pointing to the right place — skip
   if [ -L "$dst" ] && [ "$(readlink "$dst")" = "$src" ]; then
     info "Already linked: $dst"

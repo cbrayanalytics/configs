@@ -9,7 +9,6 @@ set -euo pipefail
 REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 TIMESTAMP=$(date +%Y%m%d%H%M%S)
 
-# --- Colors ---
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
@@ -28,10 +27,10 @@ error() { echo -e "${RED}  ERROR:${NC} $*" >&2; exit 1; }
 OS=""
 
 detect_os() {
-  case "$(uname -s)" in
-    Darwin)
-      OS="macos"
-      ;;
+  local uname
+  uname="$(uname -s)"
+  case "$uname" in
+    Darwin) OS="macos" ;;
     Linux)
       if [ -f /etc/arch-release ]; then
         OS="arch"
@@ -39,9 +38,7 @@ detect_os() {
         error "Linux detected but not Arch. Only macOS and Arch Linux are supported."
       fi
       ;;
-    *)
-      error "Unsupported OS: $(uname -s)"
-      ;;
+    *) error "Unsupported OS: $uname" ;;
   esac
   log "Detected OS: $OS"
 }
@@ -57,7 +54,6 @@ ensure_brew() {
   fi
   log "Installing Homebrew..."
   /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-
   # Add brew to PATH for the rest of this script (Apple Silicon vs Intel)
   if [ -f /opt/homebrew/bin/brew ]; then
     eval "$(/opt/homebrew/bin/brew shellenv)"
@@ -75,9 +71,11 @@ ensure_yay() {
   sudo pacman -S --needed --noconfirm git base-devel
   local tmp
   tmp=$(mktemp -d)
+  trap 'rm -rf "$tmp"' EXIT
   git clone https://aur.archlinux.org/yay.git "$tmp/yay"
   (cd "$tmp/yay" && makepkg -si --noconfirm)
   rm -rf "$tmp"
+  trap - EXIT
   info "yay installed"
 }
 
@@ -88,52 +86,62 @@ ensure_yay() {
 is_installed() { command -v "$1" &>/dev/null; }
 
 pkg_install() {
-  local pkg="$1"
   case "$OS" in
-    macos) brew install "$pkg" ;;
-    arch)  yay -S --noconfirm "$pkg" ;;
+    macos) brew install "$1" ;;
+    arch)  yay -S --noconfirm "$1" ;;
   esac
 }
 
-cask_install() {
-  # $1 = macOS cask name, $2 = Arch AUR package name
-  local mac_pkg="$1"
-  local arch_pkg="${2:-$1}"
-  case "$OS" in
-    macos) brew install --cask "$mac_pkg" ;;
-    arch)  yay -S --noconfirm "$arch_pkg" ;;
-  esac
+cask_installed_mac() { brew list --cask "$1" &>/dev/null; }
+
+pkg_outdated_brew() { brew outdated --quiet 2>/dev/null | grep -q "^${1}$"; }
+
+# Check and install a CLI package. Args: display_name pkg_name [cmd_to_check]
+ensure_pkg() {
+  local display="$1" pkg="$2" cmd="${3:-$2}"
+  log "Checking $display..."
+  if is_installed "$cmd"; then
+    info "$display already installed"
+    return
+  fi
+  log "Installing $display..."
+  pkg_install "$pkg"
 }
 
-cask_installed_mac() {
-  brew list --cask "$1" &>/dev/null
-}
-
-pkg_outdated_brew() {
-  brew outdated --quiet 2>/dev/null | grep -q "^${1}$"
-}
-
-# ============================================================
-# Tool Checks
-# ============================================================
-
-check_ghostty() {
-  log "Checking Ghostty..."
+# Check and install a cask (GUI app). Args: display_name mac_cask arch_pkg [arch_cmd]
+ensure_cask() {
+  local display="$1" mac_cask="$2" arch_pkg="$3" arch_cmd="${4:-$3}"
+  log "Checking $display..."
   if [ "$OS" = "macos" ]; then
-    if cask_installed_mac ghostty; then
-      info "Ghostty already installed"
+    if cask_installed_mac "$mac_cask"; then
+      info "$display already installed"
     else
-      log "Installing Ghostty..."
-      brew install --cask ghostty
+      log "Installing $display..."
+      brew install --cask "$mac_cask"
     fi
   elif [ "$OS" = "arch" ]; then
-    if is_installed ghostty; then
-      info "Ghostty already installed"
+    if is_installed "$arch_cmd"; then
+      info "$display already installed"
     else
-      log "Installing Ghostty..."
-      yay -S --noconfirm ghostty
+      log "Installing $display..."
+      yay -S --noconfirm "$arch_pkg"
     fi
   fi
+}
+
+# ============================================================
+# Tool Checks (functions for tools with non-trivial logic)
+# ============================================================
+
+check_ohmyzsh() {
+  log "Checking Oh My Zsh..."
+  if [ -d "$HOME/.oh-my-zsh" ]; then
+    info "Oh My Zsh already installed"
+    return
+  fi
+  log "Installing Oh My Zsh..."
+  # RUNZSH=no prevents switching shell mid-install; CHSH=no skips chsh prompt
+  RUNZSH=no CHSH=no sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
 }
 
 check_neovim() {
@@ -152,51 +160,12 @@ check_neovim() {
     if ! is_installed nvim; then
       log "Installing Neovim (latest stable)..."
       yay -S --noconfirm neovim
+    elif yay -Qu neovim &>/dev/null; then
+      log "Upgrading Neovim to latest stable..."
+      yay -S --noconfirm neovim
     else
-      info "Neovim installed: $(nvim --version | head -1)"
-      log "Checking for Neovim updates..."
-      yay -Syu --noconfirm neovim
+      info "Neovim is up to date: $(nvim --version | head -1)"
     fi
-  fi
-}
-
-check_starship() {
-  log "Checking Starship..."
-  if is_installed starship; then
-    info "Starship already installed: $(starship --version | head -1)"
-  else
-    log "Installing Starship..."
-    pkg_install starship
-  fi
-}
-
-check_fd() {
-  log "Checking fd..."
-  if is_installed fd; then
-    info "fd already installed"
-  else
-    log "Installing fd..."
-    pkg_install fd
-  fi
-}
-
-check_ripgrep() {
-  log "Checking ripgrep..."
-  if is_installed rg; then
-    info "ripgrep already installed"
-  else
-    log "Installing ripgrep..."
-    pkg_install ripgrep
-  fi
-}
-
-check_node() {
-  log "Checking Node.js..."
-  if is_installed node; then
-    info "Node.js already installed: $(node --version)"
-  else
-    log "Installing Node.js..."
-    pkg_install node
   fi
 }
 
@@ -228,23 +197,25 @@ check_font() {
 
 backup_if_exists() {
   local target="$1"
-  # Only back up real files/dirs — not existing symlinks
   if [ -e "$target" ] && [ ! -L "$target" ]; then
     local backup="${target}.bak.${TIMESTAMP}"
-    warn "Existing path found at $target"
-    warn "Backing up to $backup"
+    warn "Backing up $target -> $backup"
     mv "$target" "$backup"
   fi
 }
 
 link_config() {
-  local src="$1"
-  local dst="$2"
+  local src="$1" dst="$2"
 
   # Already pointing to the right place — skip
   if [ -L "$dst" ] && [ "$(readlink "$dst")" = "$src" ]; then
     info "Already linked: $dst"
     return
+  fi
+
+  # Remove broken symlink so backup_if_exists and ln -sf work correctly
+  if [ -L "$dst" ] && [ ! -e "$dst" ]; then
+    rm "$dst"
   fi
 
   backup_if_exists "$dst"
@@ -284,13 +255,28 @@ main() {
       ;;
   esac
 
-  check_ghostty
-  check_neovim
-  check_starship
-  check_fd
-  check_ripgrep
-  check_node
+  # Shell
+  check_ohmyzsh
+  ensure_pkg "Starship"  "starship"
+  ensure_pkg "zoxide"    "zoxide"
+
+  # Terminal
+  ensure_cask "Ghostty"  "ghostty"  "ghostty"  "ghostty"
   check_font
+
+  # Editor
+  check_neovim
+
+  # Neovim runtime dependencies
+  ensure_pkg "fd"        "fd"
+  ensure_pkg "ripgrep"   "ripgrep"  "rg"
+  ensure_pkg "Node.js"   "node"
+
+  # Modern CLI tools (used in .zshrc aliases)
+  ensure_pkg "eza"       "eza"
+  ensure_pkg "bat"       "bat"
+  ensure_pkg "btop"      "btop"
+
   setup_symlinks
 
   echo ""

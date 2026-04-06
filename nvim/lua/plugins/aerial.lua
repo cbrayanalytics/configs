@@ -14,12 +14,9 @@ return {
       show_guides = true,
       layout = {
         max_width = { 40, 0.2 },
-        width = nil,
         min_width = 20,
-        win_opts = {},
         placement = "window",
         resize_to_content = true,
-        preserve_equality = false,
       },
     },
   },

@@ -7,6 +7,10 @@ vim.diagnostic.config({
 			[vim.diagnostic.severity.HINT] = "\xef\x83\xab",
 		},
 	},
+	virtual_text = {
+		prefix = "●",
+		spacing = 4,
+	},
 })
 
 vim.api.nvim_create_autocmd("LspAttach", {

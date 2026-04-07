@@ -72,4 +72,9 @@ vim.lsp.config("gopls", {
 	},
 })
 
+-- Pass blink.cmp capabilities to all LSP servers so they send completion data
+vim.lsp.config("*", {
+	capabilities = require("blink.cmp").get_lsp_capabilities(),
+})
+
 vim.lsp.enable({ "lua_ls", "pyright", "gopls" })

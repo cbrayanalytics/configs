@@ -20,7 +20,8 @@ return {
     "rshkarin/mason-nvim-lint",
     dependencies = { "williamboman/mason.nvim", "mfussenegger/nvim-lint" },
     opts = {
-      ensure_installed = { "ruff", "markdownlint-cli2" },
+      ensure_installed = { "ruff" },
+      automatic_installation = { exclude = { "markdownlint-cli2" } },
     },
   },
   {

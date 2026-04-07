@@ -20,7 +20,20 @@ return {
     "rshkarin/mason-nvim-lint",
     dependencies = { "williamboman/mason.nvim", "mfussenegger/nvim-lint" },
     opts = {
-      ensure_installed = { "ruff" },
+      ensure_installed = { "ruff", "markdownlint-cli2" },
+    },
+  },
+  {
+    "WhoIsSethDaniel/mason-tool-installer.nvim",
+    dependencies = { "williamboman/mason.nvim" },
+    opts = {
+      ensure_installed = {
+        "stylua",
+        "black",
+        "isort",
+        "prettier",
+        "markdownlint-cli2",
+      },
     },
   },
 }

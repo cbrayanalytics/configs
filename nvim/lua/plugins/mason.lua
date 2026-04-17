@@ -21,14 +21,7 @@ return {
       automatic_enable = false, -- we handle vim.lsp.enable() manually
     },
   },
-  {
-    "rshkarin/mason-nvim-lint",
-    dependencies = { "williamboman/mason.nvim", "mfussenegger/nvim-lint" },
-    opts = {
-      ensure_installed = { "ruff", "golangcilint" },
-      automatic_installation = true,
-    },
-  },
+  -- Single source of truth for all tool installation (no registry validation)
   {
     "WhoIsSethDaniel/mason-tool-installer.nvim",
     dependencies = { "williamboman/mason.nvim" },
@@ -40,6 +33,8 @@ return {
         "prettier",
         "shfmt",
         "shellcheck",
+        "ruff",
+        "golangci-lint",
       },
     },
   },

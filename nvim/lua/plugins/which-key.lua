@@ -17,6 +17,7 @@ return {
 				{ "<leader>w", group = "windows" },
 				{ "<leader>t", group = "terminal" },
 				{ "<leader>m", group = "marks/harpoon" },
+				{ "<leader>g", group = "git" },
 			})
 		end,
 	},

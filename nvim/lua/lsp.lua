@@ -29,7 +29,10 @@ vim.api.nvim_create_autocmd("LspAttach", {
 		map("gD", vim.lsp.buf.declaration, "Go to declaration")
 		map("gr", vim.lsp.buf.references, "References")
 		map("gi", vim.lsp.buf.implementation, "Go to implementation")
-		map("K", vim.lsp.buf.hover, "Hover docs")
+		map("K", function()
+			local winid = require("ufo").peekFoldedLinesUnderCursor()
+			if not winid then vim.lsp.buf.hover() end
+		end, "Peek fold or hover")
 		map("<leader>cr", vim.lsp.buf.rename, "Rename")
 		map("<leader>ca", vim.lsp.buf.code_action, "Code action")
 	end,

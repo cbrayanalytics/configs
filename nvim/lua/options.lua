@@ -48,3 +48,11 @@ opt.pumheight = 10
 opt.inccommand = "split"  -- live preview of :s substitutions
 opt.confirm = true        -- confirm instead of error on unsaved buffer quit
 opt.virtualedit = "block" -- allow cursor past end of line in visual block
+
+-- Folding (nvim-ufo uses LSP/treesitter providers)
+opt.foldcolumn = "1"
+opt.foldlevel = 99
+opt.foldlevelstart = 99
+opt.foldenable = true
+opt.foldmethod = "expr"
+opt.foldexpr = "v:lua.vim.lsp.foldexpr()"

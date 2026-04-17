@@ -15,7 +15,7 @@ return {
 				{ "<leader>h", group = "git hunks" },
 				{ "<leader>c", group = "code" },
 				{ "<leader>w", group = "windows" },
-				{ "<leader>t", group = "terminal" },
+				{ "<leader>t", group = "test/terminal" },
 				{ "<leader>m", group = "marks/harpoon" },
 				{ "<leader>g", group = "git" },
 			})

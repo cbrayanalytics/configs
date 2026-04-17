@@ -26,7 +26,7 @@ return {
     dependencies = { "williamboman/mason.nvim", "mfussenegger/nvim-lint" },
     opts = {
       ensure_installed = { "ruff", "golangcilint" },
-      automatic_installation = { exclude = { "markdownlint-cli2" } },
+      automatic_installation = true,
     },
   },
   {
@@ -38,7 +38,6 @@ return {
         "black",
         "isort",
         "prettier",
-        "markdownlint-cli2",
         "shfmt",
         "shellcheck",
       },

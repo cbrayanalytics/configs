@@ -18,6 +18,7 @@ return {
 				{ "<leader>t", group = "test/terminal" },
 				{ "<leader>m", group = "marks/harpoon" },
 				{ "<leader>g", group = "git" },
+				{ "<leader>q", group = "session" },
 			})
 		end,
 	},

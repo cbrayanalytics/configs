@@ -5,6 +5,10 @@ return {
     opts = {},
   },
   {
+    "neovim/nvim-lspconfig",
+    dependencies = { "williamboman/mason-lspconfig.nvim" },
+  },
+  {
     "williamboman/mason-lspconfig.nvim",
     dependencies = { "williamboman/mason.nvim" },
     opts = {
@@ -12,6 +16,7 @@ return {
         "lua_ls",
         "pyright",
         "gopls",
+        "bashls",
       },
       automatic_enable = false, -- we handle vim.lsp.enable() manually
     },
@@ -20,7 +25,7 @@ return {
     "rshkarin/mason-nvim-lint",
     dependencies = { "williamboman/mason.nvim", "mfussenegger/nvim-lint" },
     opts = {
-      ensure_installed = { "ruff" },
+      ensure_installed = { "ruff", "golangcilint" },
       automatic_installation = { exclude = { "markdownlint-cli2" } },
     },
   },
@@ -34,6 +39,8 @@ return {
         "isort",
         "prettier",
         "markdownlint-cli2",
+        "shfmt",
+        "shellcheck",
       },
     },
   },

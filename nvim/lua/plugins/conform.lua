@@ -10,6 +10,7 @@ return {
         lua        = { "stylua" },
         python     = { "ruff_organize_imports", "black" },
         go         = { "gofmt" },
+        sh         = { "shfmt" },
         javascript = { "prettier" },
         typescript = { "prettier" },
         json       = { "prettier" },
@@ -18,7 +19,7 @@ return {
       },
       format_on_save = {
         timeout_ms = 500,
-        lsp_fallback = true,
+        lsp_format = "fallback",
       },
     },
   },

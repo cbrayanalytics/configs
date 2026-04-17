@@ -9,9 +9,12 @@ return {
         python   = { "ruff" },
         go       = { "golangcilint" },
         markdown = { "markdownlint-cli2" },
+        sh       = { "shellcheck" },
       }
 
+      local lint_augroup = vim.api.nvim_create_augroup("nvim_lint", { clear = true })
       vim.api.nvim_create_autocmd({ "BufWritePost", "BufReadPost", "InsertLeave" }, {
+        group = lint_augroup,
         callback = function()
           lint.try_lint()
         end,

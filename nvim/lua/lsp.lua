@@ -1,3 +1,8 @@
+-- Pass blink.cmp capabilities to all LSP servers (wildcard applied first)
+vim.lsp.config("*", {
+	capabilities = require("blink.cmp").get_lsp_capabilities(),
+})
+
 vim.diagnostic.config({
 	signs = {
 		text = {
@@ -25,11 +30,8 @@ vim.api.nvim_create_autocmd("LspAttach", {
 		map("gr", vim.lsp.buf.references, "References")
 		map("gi", vim.lsp.buf.implementation, "Go to implementation")
 		map("K", vim.lsp.buf.hover, "Hover docs")
-		map("<leader>rn", vim.lsp.buf.rename, "Rename")
+		map("<leader>cr", vim.lsp.buf.rename, "Rename")
 		map("<leader>ca", vim.lsp.buf.code_action, "Code action")
-		map("<leader>f", function()
-			vim.lsp.buf.format({ async = true })
-		end, "Format")
 	end,
 })
 
@@ -72,9 +74,12 @@ vim.lsp.config("gopls", {
 	},
 })
 
--- Pass blink.cmp capabilities to all LSP servers so they send completion data
-vim.lsp.config("*", {
-	capabilities = require("blink.cmp").get_lsp_capabilities(),
+vim.lsp.config("bashls", {
+	settings = {
+		bashIde = {
+			globPattern = "*@(.sh|.inc|.bash|.command)",
+		},
+	},
 })
 
-vim.lsp.enable({ "lua_ls", "pyright", "gopls" })
+vim.lsp.enable({ "lua_ls", "pyright", "gopls", "bashls" })

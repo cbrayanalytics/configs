@@ -19,6 +19,7 @@ return {
 				{ "<leader>m", group = "marks/harpoon" },
 				{ "<leader>g", group = "git" },
 				{ "<leader>q", group = "session" },
+				{ "<leader>u", group = "undo" },
 			})
 		end,
 	},

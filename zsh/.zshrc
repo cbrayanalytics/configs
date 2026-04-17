@@ -176,3 +176,7 @@ alias v="nvim"
 # Create a directory and cd into it
 mkcd() { mkdir -p "$@" && cd "$@" }
 
+
+fpath+=~/.zfunc; autoload -Uz compinit; compinit
+
+alias pytut="/Users/caseybray/.local/pytut/pytutenv/bin/python3 /Users/caseybray/.local/pytut/cli.py"  # pytut alias

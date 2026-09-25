@@ -1,4 +1,5 @@
 # Track only the Neovim configuration in this repository.
 /*
 !/.gitignore
+!/README.md
 !/nvim/

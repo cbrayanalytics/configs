@@ -1,0 +1,19 @@
+local opt = vim.opt
+
+opt.number = true
+opt.relativenumber = true
+opt.mouse = "a"
+opt.clipboard = "unnamedplus"
+opt.breakindent = true
+opt.undofile = true
+opt.ignorecase = true
+opt.smartcase = true
+opt.signcolumn = "yes"
+opt.updatetime = 250
+opt.timeoutlen = 300
+opt.splitright = true
+opt.splitbelow = true
+opt.cursorline = true
+opt.scrolloff = 8
+opt.confirm = true
+opt.winborder = "rounded"

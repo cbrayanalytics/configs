@@ -1,28 +1,28 @@
 return {
   {
     "saghen/blink.cmp",
-    version = "*",
+    version = "1.*",
+    dependencies = {
+      "rafamadriz/friendly-snippets",
+    },
     opts = {
       keymap = {
         preset = "default",
-        ["<Tab>"] = { "select_next", "snippet_forward", "fallback" },
-        ["<S-Tab>"] = { "select_prev", "snippet_backward", "fallback" },
-        ["<CR>"] = { "accept", "fallback" },
-        ["<C-Space>"] = { "show", "show_documentation", "hide_documentation" },
-        ["<C-e>"] = { "cancel", "fallback" },
       },
       appearance = {
-        use_nvim_cmp_as_default = false,
         nerd_font_variant = "mono",
+      },
+      completion = {
+        documentation = {
+          auto_show = true,
+          auto_show_delay_ms = 500,
+        },
       },
       sources = {
         default = { "lsp", "path", "snippets", "buffer" },
       },
-      cmdline = {
-        sources = { "cmdline" },
-      },
-      completion = {
-        documentation = { auto_show = true, auto_show_delay_ms = 200 },
+      fuzzy = {
+        implementation = "prefer_rust_with_warning",
       },
     },
   },

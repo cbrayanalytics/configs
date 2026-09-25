@@ -1,49 +1,68 @@
 return {
-  {
-    "nvim-neotest/neotest",
-    dependencies = {
-      "nvim-lua/plenary.nvim",
-      "nvim-treesitter/nvim-treesitter",
-      "nvim-neotest/nvim-nio",
-      -- Language adapters
-      "nvim-neotest/neotest-python",
-      "nvim-neotest/neotest-go",
-      "rcasia/neotest-bash",
-    },
-    keys = {
-      { "<leader>tn", function() require("neotest").run.run() end,                                          desc = "Test: run nearest" },
-      { "<leader>tf", function() require("neotest").run.run(vim.fn.expand("%")) end,                        desc = "Test: run file" },
-      { "<leader>ta", function() require("neotest").run.run(vim.fn.getcwd()) end,                           desc = "Test: run all" },
-      { "<leader>ts", function() require("neotest").run.stop() end,                                         desc = "Test: stop" },
-      { "<leader>to", function() require("neotest").output.open({ enter = true, auto_close = true }) end,   desc = "Test: output" },
-      { "<leader>tO", function() require("neotest").output_panel.toggle() end,                              desc = "Test: output panel" },
-      { "<leader>tS", function() require("neotest").summary.toggle() end,                                   desc = "Test: summary" },
-      { "<leader>td", function() require("neotest").run.run({ strategy = "dap" }) end,                      desc = "Test: debug nearest" },
-    },
-    opts = function()
-      return {
-        adapters = {
-          require("neotest-python")({
-            dap = { justMyCode = false },
-            runner = "pytest",
-            python = function()
-              return vim.fn.getcwd() .. "/.venv/bin/python"
-            end,
-          }),
-          require("neotest-go")({
-            experimental = { test_table = true },
-            args = { "-race", "-count=1" },
-          }),
-          require("neotest-bash")(),
-        },
-        status = { virtual_text = true },
-        output = { open_on_run = false },
-        quickfix = {
-          open = function()
-            require("trouble").open("qflist")
-          end,
-        },
-      }
-    end,
-  },
+	{
+		"nvim-neotest/neotest",
+
+		dependencies = {
+			"nvim-neotest/nvim-nio",
+			"nvim-lua/plenary.nvim",
+			"antoinemadec/FixCursorHold.nvim",
+			"nvim-treesitter/nvim-treesitter",
+			"nvim-neotest/neotest-python",
+			"rcasia/neotest-bash",
+			{
+				"fredrikaverpil/neotest-golang",
+				version = "*",
+			},
+		},
+
+		keys = {
+			{
+				"<leader>rr",
+				function()
+					require("neotest").run.run()
+				end,
+				desc = "Run nearest test",
+			},
+			{
+				"<leader>rf",
+				function()
+					require("neotest").run.run(vim.fn.expand("%"))
+				end,
+				desc = "Run current test file",
+			},
+			{
+				"<leader>rs",
+				function()
+					require("neotest").summary.toggle()
+				end,
+				desc = "Toggle test summary",
+			},
+			{
+				"<leader>ro",
+				function()
+					require("neotest").output.open({ enter = true })
+				end,
+				desc = "Show test output",
+			},
+			{
+				"<leader>rS",
+				function()
+					require("neotest").run.stop()
+				end,
+				desc = "Stop test",
+			},
+		},
+
+		config = function()
+			require("neotest").setup({
+				adapters = {
+					require("neotest-bash"),
+					require("neotest-golang")(),
+					require("neotest-python")({
+						runner = "pytest",
+					}),
+				},
+			})
+		end,
+	},
 }

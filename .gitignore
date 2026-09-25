@@ -1,11 +1,4 @@
-# Ignore everything at this level except explicitly tracked configs
+# Track only the Neovim configuration in this repository.
 /*
-!/nvim
-!/ghostty
-!/zsh
-!/starship.toml
 !/.gitignore
-!/install.sh
-
-# Ignore claude settings within tracked dirs
-**/.claude/
+!/nvim/

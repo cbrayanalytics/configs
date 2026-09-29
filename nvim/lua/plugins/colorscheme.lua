@@ -10,6 +10,7 @@ return {
 				treesitter_context = true,
 				fidget = true,
 				neotest = true,
+				neotree = true,
 			},
 		},
 		config = function(_, opts)
